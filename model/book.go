@@ -7,7 +7,7 @@ import (
 	"github.com/marlonmp/books-app/valobj"
 )
 
-type BookStatus uint
+type BookStatus uint8
 
 const (
 	BookStatusUnknown BookStatus = iota
@@ -40,12 +40,9 @@ type Book struct {
 
 func NewBook(title, description string, authorID uuid.UUID) Book {
 	return Book{
-		ID:          uuid.New(),
 		Title:       title,
 		Description: description,
 		AuthorID:    authorID,
 		Status:      BookStatusDraft,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
 	}
 }

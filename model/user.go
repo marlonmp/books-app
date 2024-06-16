@@ -7,7 +7,7 @@ import (
 	"github.com/marlonmp/books-app/valobj"
 )
 
-type UserStatus uint
+type UserStatus uint8
 
 const (
 	UserStatusUnknown UserStatus = iota
@@ -37,9 +37,10 @@ type User struct {
 
 	Username,
 	Nickname,
+	Email,
 	Bio string
 
-	CreatedBook []Book
+	Books []Book
 
 	Password valobj.Password
 
@@ -49,23 +50,15 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func NewUser(username, nickname, bio, pwd string) (User, error) {
-	pwd_, err := valobj.NewPassword(pwd)
-
-	if err != nil {
-		return User{}, err
-	}
-
+func NewUser(username, nickname, email, bio string, pwd valobj.Password) User {
 	user := User{
-		ID:        uuid.New(),
-		Username:  username,
-		Nickname:  nickname,
-		Bio:       bio,
-		Password:  pwd_,
-		Status:    UserStatusUnverified,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Username: username,
+		Nickname: nickname,
+		Email:    email,
+		Bio:      bio,
+		Password: pwd,
+		Status:   UserStatusUnverified,
 	}
 
-	return user, nil
+	return user
 }
