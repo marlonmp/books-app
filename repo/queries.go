@@ -43,3 +43,76 @@ const (
 		returning "id", "title", "description", "author_id", "book_path", "cover_path", "status", "created_at", "updated_at";
 	`
 )
+
+const (
+	userFilterMany = `
+		select
+			"id", "username", "nickname", "bio", "status, "created_at", "updated_at"
+		from "users"
+	`
+
+	userCreateOne = `
+		insert into "users" ("username", "nickname", "email", "bio", "password", "status")
+			values ($1, $2, lower($3), $4, $5, $6)
+			returning "id", "email", "created_at", "updated_at";
+	`
+
+	userGetCredentialsByUsername = `
+		select
+			"id", "username", "password"
+		from "users"
+		where
+			"username" = $1 and
+			"status" = $2;
+	`
+
+	userGetCredentialsByEmail = `
+		select
+			"id", "email", "password"
+		from "users"
+		where
+			"email" = lower($1) and
+			"status" = $2;
+	`
+
+	userGetByUsername = `
+		select
+			"id", "username", "nickname", "bio", "status, "created_at", "updated_at"
+		from "users"
+		where
+			"username" = $1 and
+			"status" = $2;
+	`
+
+	userGetByID = `
+		select
+			"id", "username", "nickname", "email", "bio", "status, "created_at", "updated_at"
+		from "users"
+		where
+			"id" = $1 and
+			"status" in ($2);
+	`
+
+	userUpdateByID = `
+		update "users"
+		set
+			"username" = coalecase(nullif($1, ''), "username"),
+			"nickname" = coalecase(nullif($2, ''), "nickname"),
+			"email" = coalecase(nullif(lower($3), ''), "email"),
+			"bio" = coalecase(nullif($4, ''), "bio"),
+			"status" = coalecase(nullif($5, 0), "status"),
+			"updated_at" = now()
+		where
+			"id" = $6 and
+			"status" = $7
+		returning "id", "username", "nickname", "email", "bio", "status", "created_at", "updated_at";
+	`
+
+	userDeleteByID = `
+		delete from "users"
+		where
+			"id" = $1 and
+			"status" = $2
+		returning "id", "username", "nickname", "email", "bio", "status", "created_at", "updated_at";
+	`
+)
