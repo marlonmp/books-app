@@ -10,12 +10,11 @@ const (
 // NotFoundError must be returned when a resource may exist but after
 // searching found nothing.
 type NotFoundError struct {
-	entity, message string
-	err             error
+	err error
 }
 
 func (enf NotFoundError) Error() string {
-	return enf.entity + " repo: Entity not found"
+	return "not found err: Resource not found"
 }
 
 func (enf NotFoundError) Unwrap() error {
@@ -27,13 +26,10 @@ func (enf NotFoundError) Code() string {
 }
 
 func (enf NotFoundError) Message() string {
-	return enf.message
+	return ""
 }
 
 func IsNotFoundError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var enf *NotFoundError
 	return errors.As(err, &enf)
 }
@@ -42,12 +38,11 @@ func IsNotFoundError(err error) bool {
 // does not exist or has not been created. In can also be used when an user
 // does not have permission to access a file or endpoint.
 type DoesNotExistError struct {
-	entity, message string
-	err             error
+	err error
 }
 
 func (dne DoesNotExistError) Error() string {
-	return dne.entity + " repo: Entity does not exist"
+	return "does not exist err: Resource does not exist"
 }
 
 func (dne DoesNotExistError) Unwrap() error {
@@ -59,13 +54,10 @@ func (dne DoesNotExistError) Code() string {
 }
 
 func (dne DoesNotExistError) Message() string {
-	return dne.message
+	return ""
 }
 
 func IsDoesNotExistError(err error) bool {
-	if err == nil {
-		return false
-	}
 	var dne *DoesNotExistError
 	return errors.As(err, &dne)
 }
