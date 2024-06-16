@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"errors"
 	"strconv"
 	"strings"
 
@@ -204,8 +203,8 @@ func (pbr psqlBookRepo) GetByID(ctx context.Context, id uuid.UUID) (b model.Book
 		&b.UpdatedAt,
 	)
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return b, NotFoundError{err}
+	if AsNotFoundError(&err) {
+		return
 	}
 
 	return
@@ -226,8 +225,8 @@ func (pbr psqlBookRepo) UpdateByID(ctx context.Context, id uuid.UUID, b model.Bo
 		&b.UpdatedAt,
 	)
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return b, NotFoundError{err}
+	if AsNotFoundError(&err) {
+		return b, err
 	}
 
 	return b, nil
@@ -248,8 +247,8 @@ func (pbr psqlBookRepo) DeleteByID(ctx context.Context, id uuid.UUID) (b model.B
 		&b.UpdatedAt,
 	)
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return b, NotFoundError{err}
+	if AsNotFoundError(&err) {
+		return
 	}
 
 	return
