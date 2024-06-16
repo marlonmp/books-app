@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -28,9 +29,9 @@ type BookRepo interface {
 	// Creates one book in the repo and return the created book
 	CreateOne(ctx context.Context, b model.Book) (model.Book, error)
 
-	// Returns one book with the given filters, if find nothing, returns a
+	// Returns one book with the given id, if find nothing, returns a
 	// [NotFoundError]
-	FilterOne(ctx context.Context, bf *BookFilters) (model.Book, error)
+	GetByID(ctx context.Context, id uuid.UUID) (model.Book, error)
 
 	// Returns one book with the given id, returned the updated book, if find
 	// nothing, returns a [NotFoundError]
@@ -177,17 +178,79 @@ func (pbr psqlBookRepo) FilterMany(ctx context.Context, bf *BookFilters) ([]mode
 }
 
 func (pbr psqlBookRepo) CreateOne(ctx context.Context, b model.Book) (model.Book, error) {
-	return model.Book{}, nil
+	row := pbr.conn.QueryRowEx(ctx, bookCreateOne, nil, b.Title, b.Description, b.AuthorID, b.BookPath, b.CoverPath, b.Status)
+
+	err := row.Scan(&b.ID, &b.CreatedAt, &b.UpdatedAt)
+
+	if err != nil {
+		return model.Book{}, nil
+	}
+
+	return b, nil
 }
 
-func (pbr psqlBookRepo) FilterOne(ctx context.Context, bf *BookFilters) (model.Book, error) {
-	return model.Book{}, nil
+func (pbr psqlBookRepo) GetByID(ctx context.Context, id uuid.UUID) (b model.Book, err error) {
+	row := pbr.conn.QueryRowEx(ctx, bookGetByID, nil, id)
+
+	err = row.Scan(
+		&b.ID,
+		&b.Title,
+		&b.Description,
+		&b.AuthorID,
+		&b.BookPath,
+		&b.CoverPath,
+		&b.Status,
+		&b.CreatedAt,
+		&b.UpdatedAt,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return b, NotFoundError{err}
+	}
+
+	return
 }
 
 func (pbr psqlBookRepo) UpdateByID(ctx context.Context, id uuid.UUID, b model.Book) (model.Book, error) {
-	return model.Book{}, nil
+	row := pbr.conn.QueryRowEx(ctx, bookUpdateByID, nil, b.Title, b.Description, b.AuthorID, b.BookPath, b.CoverPath, b.Status, id)
+
+	err := row.Scan(
+		&b.ID,
+		&b.Title,
+		&b.Description,
+		&b.AuthorID,
+		&b.BookPath,
+		&b.CoverPath,
+		&b.Status,
+		&b.CreatedAt,
+		&b.UpdatedAt,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return b, NotFoundError{err}
+	}
+
+	return b, nil
 }
 
-func (pbr psqlBookRepo) DeleteByID(ctx context.Context, id uuid.UUID) (model.Book, error) {
-	return model.Book{}, nil
+func (pbr psqlBookRepo) DeleteByID(ctx context.Context, id uuid.UUID) (b model.Book, err error) {
+	row := pbr.conn.QueryRowEx(ctx, bookDeleteByID, nil, id)
+
+	err = row.Scan(
+		&b.ID,
+		&b.Title,
+		&b.Description,
+		&b.AuthorID,
+		&b.BookPath,
+		&b.CoverPath,
+		&b.Status,
+		&b.CreatedAt,
+		&b.UpdatedAt,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return b, NotFoundError{err}
+	}
+
+	return
 }
