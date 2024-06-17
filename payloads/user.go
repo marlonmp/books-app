@@ -7,7 +7,7 @@ import (
 	"github.com/marlonmp/books-app/models"
 )
 
-type UserListPayload struct {
+type UserList struct {
 	ID        uuid.UUID         `json:"id"`
 	Username  string            `json:"username"`
 	Nickname  string            `json:"nickname"`
@@ -17,8 +17,8 @@ type UserListPayload struct {
 	UpdatedAt time.Time         `json:"updated_at,omitempty"`
 }
 
-func UserListPLFromModel(u models.User) UserListPayload {
-	return UserListPayload{
+func UserListFromModel(u models.User) UserList {
+	return UserList{
 		ID:        u.ID,
 		Username:  u.Username,
 		Nickname:  u.Nickname,
@@ -29,11 +29,11 @@ func UserListPLFromModel(u models.User) UserListPayload {
 	}
 }
 
-func UserListPLFromModels(users []models.User) []UserListPayload {
-	payloads := make([]UserListPayload, len(users))
+func UserListFromModels(users []models.User) []UserList {
+	payloads := make([]UserList, len(users))
 
 	for i, u := range users {
-		payloads[i] = UserListPLFromModel(u)
+		payloads[i] = UserListFromModel(u)
 	}
 
 	return payloads
