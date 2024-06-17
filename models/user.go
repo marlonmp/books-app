@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/marlonmp/books-app/valobj"
+	"github.com/marlonmp/books-app/valobjs"
 )
 
 type UserStatus uint8
@@ -42,7 +42,7 @@ type User struct {
 
 	Books []Book
 
-	Password valobj.Password
+	Password valobjs.Password
 
 	Status UserStatus
 
@@ -50,7 +50,7 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func NewUser(username, nickname, email, bio string, pwd valobj.Password) User {
+func NewUser(username, nickname, email, bio string, pwd valobjs.Password) User {
 	user := User{
 		Username: username,
 		Nickname: nickname,

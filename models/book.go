@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/marlonmp/books-app/valobj"
+	"github.com/marlonmp/books-app/valobjs"
 )
 
 type BookStatus uint8
@@ -30,7 +30,7 @@ type Book struct {
 	CoverPath string
 
 	BookFile,
-	CoverFile *valobj.File
+	CoverFile *valobjs.File
 
 	Status BookStatus
 

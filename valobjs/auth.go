@@ -1,4 +1,4 @@
-package valobj
+package valobjs
 
 import (
 	"database/sql/driver"
