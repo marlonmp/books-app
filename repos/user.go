@@ -1,4 +1,4 @@
-package repo
+package repos
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
-	"github.com/marlonmp/books-app/model"
+	"github.com/marlonmp/books-app/models"
 )
 
 type UserFilters struct {
 	UserID uuid.UUID
-	Status model.UserStatus
+	Status models.UserStatus
 
 	Search        string
 	OrderBy       string
@@ -20,21 +20,21 @@ type UserFilters struct {
 }
 
 type UserRepo interface {
-	FilterMany(ctx context.Context, uf *UserFilters) ([]model.User, error)
+	FilterMany(ctx context.Context, uf *UserFilters) ([]models.User, error)
 
-	CreateOne(ctx context.Context, u model.User) (model.User, error)
+	CreateOne(ctx context.Context, u models.User) (models.User, error)
 
-	GetCredentialsByUsername(ctx context.Context, username string, status model.UserStatus) (model.User, error)
+	GetCredentialsByUsername(ctx context.Context, username string, status models.UserStatus) (models.User, error)
 
-	GetCredentialsByEmail(ctx context.Context, email string, status model.UserStatus) (model.User, error)
+	GetCredentialsByEmail(ctx context.Context, email string, status models.UserStatus) (models.User, error)
 
-	GetByUsername(ctx context.Context, username string, status model.UserStatus) (model.User, error)
+	GetByUsername(ctx context.Context, username string, status models.UserStatus) (models.User, error)
 
-	GetByID(ctx context.Context, id uuid.UUID, status model.UserStatus) (model.User, error)
+	GetByID(ctx context.Context, id uuid.UUID, status models.UserStatus) (models.User, error)
 
-	UpdateByID(ctx context.Context, id uuid.UUID, status model.UserStatus, u model.User) (model.User, error)
+	UpdateByID(ctx context.Context, id uuid.UUID, status models.UserStatus, u models.User) (models.User, error)
 
-	DeleteByID(ctx context.Context, id uuid.UUID, status model.UserStatus) (model.User, error)
+	DeleteByID(ctx context.Context, id uuid.UUID, status models.UserStatus) (models.User, error)
 }
 
 type psqlUserRepo struct {
@@ -63,7 +63,7 @@ func (pur psqlUserRepo) buildFilters(uf *UserFilters) (string, []any) {
 		values = append(values, uf.UserID)
 	}
 
-	if uf.Status != model.UserStatusUnknown {
+	if uf.Status != models.UserStatusUnknown {
 		filters.WriteString(` and "status" = $`)
 		filters.WriteString(strconv.Itoa(counter))
 
@@ -134,7 +134,7 @@ func (pur psqlUserRepo) buildFilterQuery(queryStr string, uf *UserFilters) (stri
 	return query.String(), values
 }
 
-func (pur psqlUserRepo) FilterMany(ctx context.Context, uf *UserFilters) ([]model.User, error) {
+func (pur psqlUserRepo) FilterMany(ctx context.Context, uf *UserFilters) ([]models.User, error) {
 	query, values := pur.buildFilterQuery(userFilterMany, uf)
 
 	rows, err := pur.conn.QueryEx(ctx, query, nil, values...)
@@ -143,10 +143,10 @@ func (pur psqlUserRepo) FilterMany(ctx context.Context, uf *UserFilters) ([]mode
 		return nil, err
 	}
 
-	users := make([]model.User, 0)
+	users := make([]models.User, 0)
 
 	for rows.Next() {
-		u := model.User{}
+		u := models.User{}
 
 		err = rows.Scan(
 			&u.ID,
@@ -172,20 +172,20 @@ func (pur psqlUserRepo) FilterMany(ctx context.Context, uf *UserFilters) ([]mode
 	return users, nil
 }
 
-func (pur psqlUserRepo) CreateOne(ctx context.Context, u model.User) (model.User, error) {
+func (pur psqlUserRepo) CreateOne(ctx context.Context, u models.User) (models.User, error) {
 	err := pur.
 		conn.
 		QueryRowEx(ctx, userCreateOne, nil, u.Username, u.Nickname, u.Email, u.Bio, u.Password, u.Status).
 		Scan(&u.ID, &u.Email, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
-		return model.User{}, err
+		return models.User{}, err
 	}
 
 	return u, nil
 }
 
-func (pur psqlUserRepo) GetCredentialsByUsername(ctx context.Context, username string, status model.UserStatus) (u model.User, err error) {
+func (pur psqlUserRepo) GetCredentialsByUsername(ctx context.Context, username string, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userGetCredentialsByUsername, nil, u.Username, status).
@@ -198,7 +198,7 @@ func (pur psqlUserRepo) GetCredentialsByUsername(ctx context.Context, username s
 	return
 }
 
-func (pur psqlUserRepo) GetCredentialsByEmail(ctx context.Context, email string, status model.UserStatus) (u model.User, err error) {
+func (pur psqlUserRepo) GetCredentialsByEmail(ctx context.Context, email string, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userGetCredentialsByEmail, nil, u.Email, status).
@@ -211,7 +211,7 @@ func (pur psqlUserRepo) GetCredentialsByEmail(ctx context.Context, email string,
 	return
 }
 
-func (pur psqlUserRepo) GetByUsername(ctx context.Context, username string, status model.UserStatus) (u model.User, err error) {
+func (pur psqlUserRepo) GetByUsername(ctx context.Context, username string, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userGetByUsername, nil, u.Username, status).
@@ -224,7 +224,7 @@ func (pur psqlUserRepo) GetByUsername(ctx context.Context, username string, stat
 	return
 }
 
-func (pur psqlUserRepo) GetByID(ctx context.Context, id uuid.UUID, status model.UserStatus) (u model.User, err error) {
+func (pur psqlUserRepo) GetByID(ctx context.Context, id uuid.UUID, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userGetByID, nil, u.ID, status).
@@ -237,20 +237,20 @@ func (pur psqlUserRepo) GetByID(ctx context.Context, id uuid.UUID, status model.
 	return
 }
 
-func (pur psqlUserRepo) UpdateByID(ctx context.Context, id uuid.UUID, status model.UserStatus, u model.User) (model.User, error) {
+func (pur psqlUserRepo) UpdateByID(ctx context.Context, id uuid.UUID, status models.UserStatus, u models.User) (models.User, error) {
 	err := pur.
 		conn.
 		QueryRowEx(ctx, userUpdateByID, nil, u.Username, u.Nickname, u.Email, u.Bio, u.Status, u.ID, status).
 		Scan(&u.ID, &u.Username, &u.Nickname, &u.Email, &u.Bio, &u.Status, &u.CreatedAt, &u.UpdatedAt)
 
 	if AsNotFoundError(&err) {
-		return model.User{}, err
+		return models.User{}, err
 	}
 
 	return u, nil
 }
 
-func (pur psqlUserRepo) DeleteByID(ctx context.Context, id uuid.UUID, status model.UserStatus) (u model.User, err error) {
+func (pur psqlUserRepo) DeleteByID(ctx context.Context, id uuid.UUID, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userDeleteByID, nil, u.ID, status).

@@ -1,4 +1,4 @@
-package repo
+package repos
 
 import (
 	"context"
@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
-	"github.com/marlonmp/books-app/model"
+	"github.com/marlonmp/books-app/models"
 )
 
 type BookFilters struct {
 	BookID   uuid.UUID
 	AuthorID uuid.UUID
-	Status   model.BookStatus
+	Status   models.BookStatus
 
 	Search        string
 	OrderBy       string
@@ -23,22 +23,22 @@ type BookFilters struct {
 type BookRepo interface {
 	// Return a list of books with the given filters, if find nothing, returns
 	// an empty array
-	FilterMany(ctx context.Context, bf *BookFilters) ([]model.Book, error)
+	FilterMany(ctx context.Context, bf *BookFilters) ([]models.Book, error)
 
 	// Creates one book in the repo and return the created book
-	CreateOne(ctx context.Context, b model.Book) (model.Book, error)
+	CreateOne(ctx context.Context, b models.Book) (models.Book, error)
 
 	// Returns one book with the given id, if find nothing, returns a
 	// [NotFoundError]
-	GetByID(ctx context.Context, id uuid.UUID) (model.Book, error)
+	GetByID(ctx context.Context, id uuid.UUID) (models.Book, error)
 
 	// Returns one book with the given id, returned the updated book, if find
 	// nothing, returns a [NotFoundError]
-	UpdateByID(ctx context.Context, id uuid.UUID, b model.Book) (model.Book, error)
+	UpdateByID(ctx context.Context, id uuid.UUID, b models.Book) (models.Book, error)
 
 	// Delete and returns one book with the given id, if find nothing, returns
 	// a [NotFoundError]
-	DeleteByID(ctx context.Context, id uuid.UUID) (model.Book, error)
+	DeleteByID(ctx context.Context, id uuid.UUID) (models.Book, error)
 }
 
 type psqlBookRepo struct {
@@ -75,7 +75,7 @@ func (pbr psqlBookRepo) buildFilters(bf *BookFilters) (string, []any) {
 		values = append(values, bf.AuthorID)
 	}
 
-	if bf.Status != model.BookStatusUnknown {
+	if bf.Status != models.BookStatusUnknown {
 		filters.WriteString(` and "status" = $`)
 		filters.WriteString(strconv.Itoa(counter))
 
@@ -130,7 +130,7 @@ func (pbr psqlBookRepo) buildFilters(bf *BookFilters) (string, []any) {
 	return filters.String(), values
 }
 
-func (pbr psqlBookRepo) FilterMany(ctx context.Context, bf *BookFilters) ([]model.Book, error) {
+func (pbr psqlBookRepo) FilterMany(ctx context.Context, bf *BookFilters) ([]models.Book, error) {
 	var query strings.Builder
 
 	query.WriteString(bookFilterMany)
@@ -149,10 +149,10 @@ func (pbr psqlBookRepo) FilterMany(ctx context.Context, bf *BookFilters) ([]mode
 		return nil, err
 	}
 
-	books := make([]model.Book, 0)
+	books := make([]models.Book, 0)
 
 	for rows.Next() {
-		book := model.Book{}
+		book := models.Book{}
 
 		err = rows.Scan(
 			&book.ID,
@@ -176,19 +176,19 @@ func (pbr psqlBookRepo) FilterMany(ctx context.Context, bf *BookFilters) ([]mode
 	return books, nil
 }
 
-func (pbr psqlBookRepo) CreateOne(ctx context.Context, b model.Book) (model.Book, error) {
+func (pbr psqlBookRepo) CreateOne(ctx context.Context, b models.Book) (models.Book, error) {
 	row := pbr.conn.QueryRowEx(ctx, bookCreateOne, nil, b.Title, b.Description, b.AuthorID, b.BookPath, b.CoverPath, b.Status)
 
 	err := row.Scan(&b.ID, &b.CreatedAt, &b.UpdatedAt)
 
 	if err != nil {
-		return model.Book{}, nil
+		return models.Book{}, nil
 	}
 
 	return b, nil
 }
 
-func (pbr psqlBookRepo) GetByID(ctx context.Context, id uuid.UUID) (b model.Book, err error) {
+func (pbr psqlBookRepo) GetByID(ctx context.Context, id uuid.UUID) (b models.Book, err error) {
 	row := pbr.conn.QueryRowEx(ctx, bookGetByID, nil, id)
 
 	err = row.Scan(
@@ -210,7 +210,7 @@ func (pbr psqlBookRepo) GetByID(ctx context.Context, id uuid.UUID) (b model.Book
 	return
 }
 
-func (pbr psqlBookRepo) UpdateByID(ctx context.Context, id uuid.UUID, b model.Book) (model.Book, error) {
+func (pbr psqlBookRepo) UpdateByID(ctx context.Context, id uuid.UUID, b models.Book) (models.Book, error) {
 	row := pbr.conn.QueryRowEx(ctx, bookUpdateByID, nil, b.Title, b.Description, b.AuthorID, b.BookPath, b.CoverPath, b.Status, id)
 
 	err := row.Scan(
@@ -232,7 +232,7 @@ func (pbr psqlBookRepo) UpdateByID(ctx context.Context, id uuid.UUID, b model.Bo
 	return b, nil
 }
 
-func (pbr psqlBookRepo) DeleteByID(ctx context.Context, id uuid.UUID) (b model.Book, err error) {
+func (pbr psqlBookRepo) DeleteByID(ctx context.Context, id uuid.UUID) (b models.Book, err error) {
 	row := pbr.conn.QueryRowEx(ctx, bookDeleteByID, nil, id)
 
 	err = row.Scan(
