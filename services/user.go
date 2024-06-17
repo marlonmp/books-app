@@ -23,3 +23,21 @@ func (us userService) FilterMany(ctx context.Context, uf *repos.UserFilters) ([]
 
 	return usersPayload, nil
 }
+
+func (us userService) CreateOne(ctx context.Context, payload payloads.UserCreate) (payloads.UserList, error) {
+	user, err := payload.ToModel()
+
+	if err != nil {
+		return payloads.UserList{}, err
+	}
+
+	user, err = us.users.CreateOne(ctx, user)
+
+	if err != nil {
+		return payloads.UserList{}, err
+	}
+
+	usersPayload := payloads.UserListFromModel(user)
+
+	return usersPayload, nil
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/marlonmp/books-app/models"
+	"github.com/marlonmp/books-app/valobjs"
 )
 
 type UserList struct {
@@ -37,4 +38,24 @@ func UserListFromModels(users []models.User) []UserList {
 	}
 
 	return payloads
+}
+
+type UserCreate struct {
+	Username string `json:"username"`
+	Nickname string `json:"nickname"`
+	Email    string `json:"email"`
+	Bio      string `json:"bio"`
+	Password string `json:"password"`
+}
+
+func (uc UserCreate) ToModel() (models.User, error) {
+	password, err := valobjs.NewPassword(uc.Password)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	user := models.NewUser(uc.Username, uc.Nickname, uc.Email, uc.Bio, password)
+
+	return user, nil
 }
