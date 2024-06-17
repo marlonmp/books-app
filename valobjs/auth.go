@@ -2,8 +2,13 @@ package valobjs
 
 import (
 	"database/sql/driver"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	ErrPasswordInvalidType = errors.New("invalid type: invalid type for password struct")
 )
 
 type Password struct {
@@ -37,6 +42,11 @@ func (p Password) IsEqual(pwd string) bool {
 	return err == nil
 }
 
+func (p Password) String() string {
+	// returns an empty strings, because the password never bee shown
+	return ""
+}
+
 func (p *Password) Scan(src any) error {
 	if src == nil {
 		*p = Password{"", true}
@@ -50,6 +60,8 @@ func (p *Password) Scan(src any) error {
 		hashedPassword = []byte(val)
 	case []byte:
 		hashedPassword = val
+	default:
+		return ErrPasswordInvalidType
 	}
 
 	_, err := bcrypt.Cost(hashedPassword)
@@ -69,4 +81,13 @@ func (p Password) Value() (driver.Value, error) {
 	}
 
 	return p.hash, nil
+}
+
+func (p Password) MarshalJSON() ([]byte, error) {
+	// returns an empty strings, because the password never bee shown
+	return []byte(""), nil
+}
+
+func (p Password) UnmarshalJSON(data []byte) error {
+	return nil
 }
