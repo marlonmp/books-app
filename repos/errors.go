@@ -6,10 +6,16 @@ import (
 	"github.com/jackc/pgx"
 )
 
+type errorCode string
+
 const (
-	NotFoundErrorCode     = "resource_not_found"
-	DoesNotExistErrorCode = "resource_does_not_exist"
-	ConflictErrorCode     = "resource_already_exist"
+	NotFoundErrorCode     errorCode = "resource_not_found"
+	DoesNotExistErrorCode errorCode = "resource_does_not_exist"
+
+	ConflictErrorCode errorCode = "resource_already_exist"
+
+	InvalidCredentialsErrorCode errorCode = "invalid_authentication_credentials"
+	MissingCredentialsErrorCode errorCode = "missing_authentication_credentials"
 )
 
 // NotFoundError must be returned when a resource may exist but after
@@ -19,19 +25,15 @@ type NotFoundError struct {
 }
 
 func (enf NotFoundError) Error() string {
-	return "not found err: resource not found"
+	return "not found: this resource not found"
 }
 
 func (enf NotFoundError) Unwrap() error {
 	return enf.err
 }
 
-func (enf NotFoundError) Code() string {
+func (enf NotFoundError) Code() errorCode {
 	return NotFoundErrorCode
-}
-
-func (enf NotFoundError) Message() string {
-	return ""
 }
 
 func IsNotFoundError(err error) bool {
@@ -62,19 +64,15 @@ type DoesNotExistError struct {
 }
 
 func (dne DoesNotExistError) Error() string {
-	return "does not exist err: resource does not exist"
+	return "does not exist: this resource does not exist"
 }
 
 func (dne DoesNotExistError) Unwrap() error {
 	return dne.err
 }
 
-func (dne DoesNotExistError) Code() string {
+func (dne DoesNotExistError) Code() errorCode {
 	return DoesNotExistErrorCode
-}
-
-func (dne DoesNotExistError) Message() string {
-	return ""
 }
 
 func IsDoesNotExistError(err error) bool {
@@ -87,22 +85,53 @@ type ConflictError struct {
 }
 
 func (ce ConflictError) Error() string {
-	return "conflict err: resource already exist"
+	return "conflict: this resource already exist"
 }
 
 func (ce ConflictError) Unwrap() error {
 	return ce.err
 }
 
-func (ce ConflictError) Code() string {
+func (ce ConflictError) Code() errorCode {
 	return ConflictErrorCode
-}
-
-func (ce ConflictError) Message() string {
-	return ""
 }
 
 func IsConflictError(err error) bool {
 	var ce *ConflictError
 	return errors.As(err, &ce)
+}
+
+// InvalidCredentialsError must be returned when the provided credentials
+// are invalid
+type InvalidCredentialsError struct {
+	err error
+}
+
+func (ice InvalidCredentialsError) Error() string {
+	return "invalid credentials: the provided credentials are invalid"
+}
+
+func (ice InvalidCredentialsError) Unwrap() error {
+	return ice.err
+}
+
+func (ice InvalidCredentialsError) Code() errorCode {
+	return InvalidCredentialsErrorCode
+}
+
+// MissingCredentialsError must be returned when the credentials are not provided
+type MissingCredentialsError struct {
+	err error
+}
+
+func (ice MissingCredentialsError) Error() string {
+	return "missing credentials: the credentials were not provided"
+}
+
+func (ice MissingCredentialsError) Unwrap() error {
+	return ice.err
+}
+
+func (ice MissingCredentialsError) Code() errorCode {
+	return MissingCredentialsErrorCode
 }
