@@ -188,8 +188,8 @@ func (pur psqlUserRepo) CreateOne(ctx context.Context, u models.User) (models.Us
 func (pur psqlUserRepo) GetCredentialsByUsername(ctx context.Context, username string, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
-		QueryRowEx(ctx, userGetCredentialsByUsername, nil, u.Username, status).
-		Scan(&u.ID, &u.Username, &u.Password)
+		QueryRowEx(ctx, userGetCredentialsByUsername, nil, username, status).
+		Scan(&u.ID, &u.Username, &u.Nickname, &u.Bio, &u.Password, &u.Status, &u.CreatedAt, &u.UpdatedAt)
 
 	if AsNotFoundError(&err) {
 		return
@@ -201,8 +201,8 @@ func (pur psqlUserRepo) GetCredentialsByUsername(ctx context.Context, username s
 func (pur psqlUserRepo) GetCredentialsByEmail(ctx context.Context, email string, status models.UserStatus) (u models.User, err error) {
 	err = pur.
 		conn.
-		QueryRowEx(ctx, userGetCredentialsByEmail, nil, u.Email, status).
-		Scan(&u.ID, &u.Email, &u.Password)
+		QueryRowEx(ctx, userGetCredentialsByEmail, nil, email, status).
+		Scan(&p)
 
 	if AsNotFoundError(&err) {
 		return
@@ -215,7 +215,7 @@ func (pur psqlUserRepo) GetByUsername(ctx context.Context, username string, stat
 	err = pur.
 		conn.
 		QueryRowEx(ctx, userGetByUsername, nil, u.Username, status).
-		Scan(&u.ID, &u.Username, &u.Nickname, &u.Bio, &u.Status, &u.CreatedAt, &u.UpdatedAt)
+		Scan(&u.ID, &u.Username, &u.Nickname, &u.Bio, &u.Password, &u.Status, &u.CreatedAt, &u.UpdatedAt)
 
 	if AsNotFoundError(&err) {
 		return

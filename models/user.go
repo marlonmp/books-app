@@ -57,7 +57,6 @@ func NewUser(username, nickname, email, bio string, pwd valobjs.Password) User {
 		Email:    email,
 		Bio:      bio,
 		Password: pwd,
-		Status:   UserStatusUnverified,
 	}
 
 	return user

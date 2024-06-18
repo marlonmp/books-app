@@ -59,7 +59,7 @@ const (
 
 	userGetCredentialsByUsername = `
 		select
-			"id", "username", "password"
+			"id", "username", "nickname", "bio", "password", "status, "created_at", "updated_at"
 		from "users"
 		where
 			"username" = $1 and
@@ -68,7 +68,7 @@ const (
 
 	userGetCredentialsByEmail = `
 		select
-			"id", "email", "password"
+			"id", "username", "nickname", "bio", "password", "status, "created_at", "updated_at"
 		from "users"
 		where
 			"email" = lower($1) and

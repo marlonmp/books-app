@@ -59,3 +59,8 @@ func (uc UserCreate) ToModel() (models.User, error) {
 
 	return user, nil
 }
+
+type UserCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
