@@ -85,7 +85,26 @@ func (us userService) SignIn(ctx context.Context, payload payloads.UserCredentia
 		return payloads.UserList{}, err
 	}
 
+	// session, err := us.sessions.CreateUserSession(ctx, user)
+	// if err != nil {
+	// 	return payloads.UserList{}, err
+	// }
+
 	usersPayload := payloads.UserListFromModel(user)
 
 	return usersPayload, nil
+}
+
+func (us userService) UserProfile(ctx context.Context, username string) (payloads.UserProfile, error) {
+	// validate username
+
+	user, err := us.users.GetByUsername(ctx, username, models.UserStatusActive)
+
+	if err != nil {
+		return payloads.UserProfile{}, err
+	}
+
+	payload := payloads.UserProfileFromModel(user)
+
+	return payload, nil
 }

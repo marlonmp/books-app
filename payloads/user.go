@@ -64,3 +64,26 @@ type UserCredentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type UserProfile struct {
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Nickname  string    `json:"nickname"`
+	Bio       string    `json:"bio"`
+	CreatedAt time.Time `json:"created_at"`
+
+	Books []BookList `json:"books"`
+}
+
+func UserProfileFromModel(u models.User) UserProfile {
+	books := BookListFromModels(u.Books)
+
+	return UserProfile{
+		ID:        u.ID,
+		Username:  u.Username,
+		Nickname:  u.Nickname,
+		Bio:       u.Bio,
+		CreatedAt: u.CreatedAt,
+		Books:     books,
+	}
+}
